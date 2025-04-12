@@ -1,12 +1,13 @@
 import SearchBar from "@/components/SearchBar";
 import { Text, View, KeyboardAvoidingView, StyleSheet } from "react-native";
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 
 function Index() {
   return (
     <KeyboardAvoidingView style={styles.container}>
       <View style={styles.subContainer}>
         <SearchBar />
-        
+        <MapView provider={PROVIDER_GOOGLE} style={styles.map} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -23,7 +24,11 @@ const styles = StyleSheet.create({
     // flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 30
+    marginTop: 30,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
   },
 });
 

@@ -10,13 +10,21 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.kloudius.assessment",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "AIzaSyBFz26ygfUp4lJ1iXI4HjWMZhWnxR3AmNI"
+      }
     },
     "android": {
       "package": "com.kloudius.assessment",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC6bCwWZfJRIDqS_iwVRXAoQqjUeE9HO3o"
+        }
       }
     },
     "web": {
