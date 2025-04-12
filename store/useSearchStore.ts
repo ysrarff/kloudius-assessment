@@ -1,23 +1,31 @@
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
-interface SearchStore {
-  bears: number;
-  increase: (by: number) => void;
+interface ISearchedCoordinates {
+  latitude: number;
+  longitude: number;
 }
 
-const useSearchStore = create<SearchStore>()(
-  devtools(
-    persist(
-      (set) => ({
-        bears: 0,
-        increase: (by) => set((state) => ({ bears: state.bears + by })),
-      }),
-      {
-        name: "bear-storage",
-      }
-    )
-  )
-);
+type State = {
+  searchedCoordinates: ISearchedCoordinates | null;
+};
 
-export default useSearchStore;
+type Actions = {
+  setSearchedCoordinates: (coords: ISearchedCoordinates) => void;
+};
+
+type AppStoreType = State & Actions;
+
+const initialState: State = {
+  searchedCoordinates: null,
+};
+
+export const useAppStore = create<AppStoreType>()(
+  immer((set) => ({
+    ...initialState,
+    setSearchedCoordinates: (val) =>
+      set((state) => {
+        state.searchedCoordinates = val;
+      }),
+  }))
+);
