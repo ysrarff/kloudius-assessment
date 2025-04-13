@@ -12,6 +12,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useAppStore } from "@/store/useSearchStore";
 import { router } from "expo-router";
+import { theme } from "@/constants/Colors";
 
 function Index() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -97,7 +98,7 @@ function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F3F3",
+    backgroundColor: theme.colors.bgGrey,
   },
   subContainer: {
     marginTop: 30,
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     right: 26,
   },
   fabButton: {
-    backgroundColor: "#22333b",
+    backgroundColor: theme.colors.emeraldGreen,
     padding: 14,
     borderRadius: 50,
   },

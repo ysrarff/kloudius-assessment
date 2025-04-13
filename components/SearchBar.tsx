@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import {
   View,
   TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
   StyleSheet,
   Dimensions,
   ScrollView,
   Text,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import axios from "axios";
@@ -16,14 +15,16 @@ import { useAppStore } from "@/store/useSearchStore";
 import useDebounce from "@/hooks/useDebounce";
 import { IPlace } from "@/store/types/SearchStoreType";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { theme } from "@/constants/Colors";
 
-function SearchBar2() {
+function SearchBar() {
   const {
     searchResult,
     setSearchResult,
     setSelectedCoordinates,
     setSelectedPlace,
   } = useAppStore();
+
   const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
@@ -36,7 +37,7 @@ function SearchBar2() {
     let config = {
       headers: {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": "AIzaSyDjZgyeOotCIdZ7A5YU1yjP6rKcrcUhSY8",
+        "X-Goog-Api-Key": process.env.EXPO_PUBLIC_WEB_PLACES_API_KEY,
         "X-Goog-FieldMask":
           "places.displayName,places.formattedAddress,places.priceLevel,places.location,places.id",
       },
@@ -96,6 +97,33 @@ function SearchBar2() {
     setSearchText(searchText);
   };
 
+  const _renderResultFlatlist = ({
+    item,
+    idx,
+  }: {
+    item: IPlace;
+    idx: number;
+  }) => (
+    <TouchableOpacity onPress={() => onSelectLocation(item)}>
+      <View
+        style={{
+          ...styles.resultContainer,
+          marginBottom:
+            searchResult && idx === searchResult?.places.length - 1 ? 80 : 0,
+        }}
+      >
+        <Text style={styles.placeName}>{item?.displayName?.text}</Text>
+        <Text style={styles.placeAddress}>{item?.formattedAddress}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const _renderResultHeader = () => (
+    <Text style={styles.foundLocationText}>
+      Found {searchResult?.places.length} results:
+    </Text>
+  );
+
   return (
     <View
       style={{
@@ -107,49 +135,27 @@ function SearchBar2() {
           style={styles.searchIcon}
           name="location"
           size={32}
-          color="#000"
+          color={theme.colors.black}
         />
         <TextInput
           style={styles.input}
           placeholder={"Search for an address"}
-          placeholderTextColor={"#666"}
+          placeholderTextColor={theme.colors.lightGrey}
           textAlign="left"
           onChangeText={onChangeText}
           value={searchText}
         />
       </View>
       {searchResult && (
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContainer}
-        >
-          <Text style={styles.foundLocationText}>
-            Found {searchResult?.places.length} results:
-          </Text>
-          {searchResult?.places.map((item, idx) => {
-            return (
-              <TouchableOpacity
-                key={item?.id}
-                onPress={() => onSelectLocation(item)}
-              >
-                <View
-                  style={{
-                    ...styles.resultContainer,
-                    marginBottom:
-                      idx === searchResult?.places.length - 1 ? 20 : 0,
-                  }}
-                >
-                  <Text style={styles.placeName}>
-                    {item?.displayName?.text}
-                  </Text>
-                  <Text style={styles.placeAddress}>
-                    {item?.formattedAddress}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        <FlatList
+          keyExtractor={(item) => item.id}
+          data={searchResult?.places}
+          renderItem={({ item, index: idx }) =>
+            _renderResultFlatlist({ item, idx })
+          }
+          ListHeaderComponent={_renderResultHeader}
+          style={styles.flatListContainer}
+        />
       )}
     </View>
   );
@@ -163,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderRadius: 12,
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: theme.colors.transparent,
     marginHorizontal: 16,
     marginTop: 10,
   },
@@ -182,9 +188,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     height: Dimensions.get("screen").height / 17,
   },
-  scrollViewContainer: {
-    height: "auto",
-    marginHorizontal: 16,
+  flatListContainer: {
+    height: "100%",
+    paddingHorizontal: 16,
   },
   foundLocationText: {
     fontWeight: "bold",
@@ -201,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     backgroundColor: "#fafafa",
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: theme.colors.transparent,
     borderRadius: 12,
     borderWidth: 1,
     justifyContent: "space-between",
@@ -210,4 +216,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchBar2;
+export default SearchBar;

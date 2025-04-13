@@ -1,4 +1,5 @@
 import {
+  FlatList,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,14 +11,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { IPlace } from "@/store/types/SearchStoreType";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
+import { theme } from "@/constants/Colors";
+import { useAppStore } from "@/store/useSearchStore";
+import { router } from "expo-router";
 
 function History() {
+  const { setSearchResult, setSelectedCoordinates, setSelectedPlace } =
+    useAppStore();
+
   const [historyList, setHistoryList] = useState<IPlace[]>([]);
+
   useEffect(() => {
-    _renderHistoryList();
+    _loadHistoryList();
   }, []);
 
-  const _renderHistoryList = async () => {
+  const _loadHistoryList = async () => {
     try {
       const value = await AsyncStorage.getItem("storedLocation");
       if (value !== null) {
@@ -27,6 +35,20 @@ function History() {
     } catch (e) {
       console.log("error fetching location...", e);
     }
+  };
+
+  const onSelectPastLocation = (data: IPlace) => {
+    setSelectedCoordinates({
+      latitude: data.location.latitude,
+      longitude: data.location.longitude,
+    });
+    setSelectedPlace({
+      displayName: data.displayName,
+      formattedAddress: data.formattedAddress,
+    });
+
+    setSearchResult(undefined);
+    router.back()
   };
 
   const onPressRemovePlace = async (idx: number) => {
@@ -53,35 +75,55 @@ function History() {
     await AsyncStorage.removeItem("storedLocation");
   };
 
+  const _renderHistoryList = ({ item, idx }: { item: IPlace; idx: number }) => (
+    <TouchableOpacity onPress={() => onSelectPastLocation(item)}>
+      <View
+        style={{
+          ...styles.resultContainer,
+          marginBottom: idx === historyList.length - 1 ? 80 : 0,
+        }}
+      >
+        <View style={styles.placeContainer} key={item.id}>
+          <Text style={styles.placeName}>{item.displayName.text}</Text>
+          <Text style={styles.placeAddress}>{item.formattedAddress}</Text>
+        </View>
+        <View style={styles.removeIconContainer}>
+          <TouchableOpacity onPress={() => onPressRemovePlace(idx)}>
+            <EvilIcons
+              style={styles.removeIcon}
+              name="trash"
+              size={32}
+              color={theme.colors.black}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const _renderHistoryHeader = () => (
+    <TouchableOpacity onPress={onPressRemoveAllPlaces}>
+      <Text style={styles.clearAllText}>Clear All</Text>
+    </TouchableOpacity>
+  );
+
+  const _renderEmptyHistory = () => (
+    <View style={styles.emptyHistoryContainer}>
+      <Text style={styles.emptyHistoryText}>
+        Oops... You haven't searched any location yet
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        <TouchableOpacity onPress={onPressRemoveAllPlaces}>
-          <Text style={styles.clearAllText}>Clear All</Text>
-        </TouchableOpacity>
-        {historyList ? (
-          historyList.map((item, idx) => (
-            <View style={styles.resultContainer}>
-              <View style={styles.placeContainer} key={item.id}>
-                <Text style={styles.placeName}>{item.displayName.text}</Text>
-                <Text style={styles.placeAddress}>{item.formattedAddress}</Text>
-              </View>
-              <View style={styles.removeIconContainer}>
-                <TouchableOpacity onPress={() => onPressRemovePlace(idx)}>
-                  <EvilIcons
-                    style={styles.removeIcon}
-                    name="trash"
-                    size={32}
-                    color="#000"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))
-        ) : (
-          <Text>Oops... You haven't searched any location yet</Text>
-        )}
-      </ScrollView>
+      <FlatList
+        data={historyList}
+        renderItem={({ item, index: idx }) => _renderHistoryList({ item, idx })}
+        ListHeaderComponent={_renderHistoryHeader}
+        ListEmptyComponent={_renderEmptyHistory}
+        style={styles.flatListContainer}
+      />
     </SafeAreaView>
   );
 }
@@ -89,25 +131,24 @@ function History() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F3F3",
+    backgroundColor: theme.colors.bgGrey,
   },
-  scrollViewContainer: {
-    marginHorizontal: 16,
-    paddingBottom: 20,
+  flatListContainer: {
+    paddingHorizontal: 16,
   },
   clearAllText: {
     fontWeight: "bold",
     marginTop: 24,
     marginBottom: 12,
-    textAlign: "right"
+    textAlign: "right",
   },
   resultContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "stretch",
     justifyContent: "space-evenly",
-    backgroundColor: "#fafafa",
-    borderColor: "rgba(0,0,0,0.1)",
+    backgroundColor: theme.colors.offWhite,
+    borderColor: theme.colors.transparent,
     borderRadius: 12,
     borderWidth: 1,
     marginTop: 8,
@@ -131,6 +172,15 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     padding: 10,
+  },
+  emptyHistoryContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  emptyHistoryText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
