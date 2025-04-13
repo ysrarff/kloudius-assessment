@@ -71,7 +71,14 @@ function SearchBar() {
       if (storedLocation !== null) {
         const locationArray = JSON.parse(storedLocation);
         locationArray.push(data);
-        const reversedLocationArray = locationArray.reverse();
+
+        // Logic to prevent duplicate history
+        const tempSet = new Set();
+        const uniqueLocationArray = locationArray.filter(
+          (item: IPlace) => !tempSet.has(item.id) && tempSet.add(item.id)
+        );
+
+        const reversedLocationArray = uniqueLocationArray.reverse();
         await AsyncStorage.setItem(
           "storedLocation",
           JSON.stringify(reversedLocationArray)
@@ -226,7 +233,7 @@ const styles = StyleSheet.create({
   emptyResultContainer: {
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    paddingVertical: 30
+    paddingVertical: 30,
   },
   emptyResultText: {
     fontSize: 16,
