@@ -1,4 +1,3 @@
-import SearchBar from "@/components/SearchBar";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -7,16 +6,16 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { useAppStore } from "@/store/useSearchStore";
 import { router } from "expo-router";
+
+import { useAppStore } from "@/store/useSearchStore";
 import { theme } from "@/constants/Colors";
+import SearchBar from "@/components/SearchBar";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 function Index() {
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const {
     searchResult,
     selectedCoordinates,
@@ -25,15 +24,14 @@ function Index() {
   } = useAppStore();
 
   useEffect(() => {
-    getDefaultLocation();
+    _getDefaultLocation();
   }, []);
 
-  const getDefaultLocation = async () => {
+  const _getDefaultLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== "granted") {
       console.log("error...");
-      setErrorMsg("Permission to access location was denied");
       return;
     }
 
@@ -46,7 +44,7 @@ function Index() {
     });
   };
 
-  const onPressHistory = () => {
+  const _onPressHistory = () => {
     router.navigate("/history");
   };
 
@@ -85,11 +83,7 @@ function Index() {
       </SafeAreaView>
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity onPress={onPressHistory}>
-          <View style={styles.fabButton}>
-            <MaterialIcons name="menu-book" size={32} color="#fff" />
-          </View>
-        </TouchableOpacity>
+        <FloatingActionButton _onPress={_onPressHistory} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -122,11 +116,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 26,
     right: 26,
-  },
-  fabButton: {
-    backgroundColor: theme.colors.emeraldGreen,
-    padding: 14,
-    borderRadius: 50,
   },
 });
 

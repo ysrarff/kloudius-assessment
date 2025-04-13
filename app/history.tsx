@@ -1,19 +1,19 @@
+import { useEffect, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
-import { IPlace } from "@/store/types/SearchStoreType";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
-import { theme } from "@/constants/Colors";
-import { useAppStore } from "@/store/useSearchStore";
 import { router } from "expo-router";
+
+import { useAppStore } from "@/store/useSearchStore";
+import { IPlace } from "@/store/types/SearchStoreType";
+import { theme } from "@/constants/Colors";
 
 function History() {
   const { setSearchResult, setSelectedCoordinates, setSelectedPlace } =
@@ -37,7 +37,7 @@ function History() {
     }
   };
 
-  const onSelectPastLocation = (data: IPlace) => {
+  const _onSelectPastLocation = (data: IPlace) => {
     setSelectedCoordinates({
       latitude: data.location.latitude,
       longitude: data.location.longitude,
@@ -48,10 +48,10 @@ function History() {
     });
 
     setSearchResult(undefined);
-    router.back()
+    router.back();
   };
 
-  const onPressRemovePlace = async (idx: number) => {
+  const _onPressRemovePlace = async (idx: number) => {
     try {
       const value = await AsyncStorage.getItem("storedLocation");
       if (value !== null) {
@@ -70,13 +70,13 @@ function History() {
     }
   };
 
-  const onPressRemoveAllPlaces = async () => {
+  const _onPressRemoveAllPlaces = async () => {
     setHistoryList([]);
     await AsyncStorage.removeItem("storedLocation");
   };
 
   const _renderHistoryList = ({ item, idx }: { item: IPlace; idx: number }) => (
-    <TouchableOpacity onPress={() => onSelectPastLocation(item)}>
+    <TouchableOpacity onPress={() => _onSelectPastLocation(item)}>
       <View
         style={{
           ...styles.resultContainer,
@@ -88,7 +88,7 @@ function History() {
           <Text style={styles.placeAddress}>{item.formattedAddress}</Text>
         </View>
         <View style={styles.removeIconContainer}>
-          <TouchableOpacity onPress={() => onPressRemovePlace(idx)}>
+          <TouchableOpacity onPress={() => _onPressRemovePlace(idx)}>
             <EvilIcons
               style={styles.removeIcon}
               name="trash"
@@ -102,7 +102,7 @@ function History() {
   );
 
   const _renderHistoryHeader = () => (
-    <TouchableOpacity onPress={onPressRemoveAllPlaces}>
+    <TouchableOpacity onPress={_onPressRemoveAllPlaces}>
       <Text style={styles.clearAllText}>Clear All</Text>
     </TouchableOpacity>
   );
@@ -118,6 +118,7 @@ function History() {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
+        keyExtractor={(item) => item.id}
         data={historyList}
         renderItem={({ item, index: idx }) => _renderHistoryList({ item, idx })}
         ListHeaderComponent={_renderHistoryHeader}

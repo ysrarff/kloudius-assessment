@@ -84,9 +84,6 @@ function SearchBar() {
           JSON.stringify(locationArray)
         );
       }
-
-      // const parsedLocation = JSON.stringify(data);
-      // await AsyncStorage.setItem(data.id, parsedLocation);
     } catch (e) {
       console.log("error saving location...", e);
     }
@@ -118,10 +115,21 @@ function SearchBar() {
     </TouchableOpacity>
   );
 
-  const _renderResultHeader = () => (
-    <Text style={styles.foundLocationText}>
-      Found {searchResult?.places.length} results:
-    </Text>
+  const _renderResultHeader = () =>
+    searchResult && (
+      <Text style={styles.foundLocationText}>
+        {searchResult?.places && searchResult?.places.length !== 1
+          ? `Found ${searchResult?.places.length} results:`
+          : searchResult?.places && searchResult?.places.length === 1
+          ? `Found 1 result:`
+          : "Found 0 result:"}
+      </Text>
+    );
+
+  const _renderEmptyResult = () => (
+    <View style={styles.emptyResultContainer}>
+      <Text style={styles.emptyResultText}>Try another search</Text>
+    </View>
   );
 
   return (
@@ -154,6 +162,7 @@ function SearchBar() {
             _renderResultFlatlist({ item, idx })
           }
           ListHeaderComponent={_renderResultHeader}
+          ListEmptyComponent={_renderEmptyResult}
           style={styles.flatListContainer}
         />
       )}
@@ -213,6 +222,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 8,
     padding: 16,
+  },
+  emptyResultContainer: {
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    paddingVertical: 30
+  },
+  emptyResultText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
