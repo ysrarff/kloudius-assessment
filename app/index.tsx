@@ -1,22 +1,27 @@
-import SearchBar from "@/components/SearchBar";
 import SearchBar2 from "@/components/SearchBar2";
 import { useEffect, useState } from "react";
 import {
-  Text,
   View,
   KeyboardAvoidingView,
   StyleSheet,
-  Dimensions,
-  Platform,
+  SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useAppStore } from "@/store/useSearchStore";
+import { router } from "expo-router";
 
 function Index() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const { searchedCoordinates, setSearchedCoordinates } = useAppStore();
+  const {
+    searchResult,
+    selectedCoordinates,
+    selectedPlace,
+    setSelectedCoordinates,
+  } = useAppStore();
 
   useEffect(() => {
     getDefaultLocation();
@@ -32,37 +37,58 @@ function Index() {
     }
 
     let location = await Location.getCurrentPositionAsync({});
-    // console.log(JSON.stringify(location));
     // console.log(location.coords);
-    
-    setSearchedCoordinates({
+
+    setSelectedCoordinates({
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     });
   };
 
+  const onPressHistory = () => {
+    router.navigate("/history");
+  };
+
+  // Commenting out provider since react-native-maps (iOS)
+  // has issues with Expo SDK 52, will default to Apple Maps
   return (
     <KeyboardAvoidingView style={styles.container}>
-      {/* <View style={styles.subContainer}>
-         <SearchBar />
-       </View>
-       <View style={styles.mapContainer}>
-         <MapView provider={PROVIDER_GOOGLE} style={styles.map} />
-       </View> */}
-      {searchedCoordinates && (
+      {selectedCoordinates && (
         <MapView
-          provider={PROVIDER_GOOGLE}
+          // provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={{
-            latitude: searchedCoordinates.latitude,
-            longitude: searchedCoordinates.longitude,
+            latitude: selectedCoordinates.latitude,
+            longitude: selectedCoordinates.longitude,
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
           }}
-        />
+        >
+          <Marker
+            title={selectedPlace?.displayName.text}
+            coordinate={{
+              latitude: selectedCoordinates.latitude,
+              longitude: selectedCoordinates.longitude,
+            }}
+          />
+        </MapView>
       )}
-      <View style={{ position: "absolute", top: 10, width: "100%" }}>
+      <SafeAreaView
+        style={{
+          ...styles.searchBarContainer,
+          height:
+            searchResult && searchResult?.places.length > 0 ? "100%" : "auto",
+        }}
+      >
         <SearchBar2 />
+      </SafeAreaView>
+
+      <View style={styles.fabContainer}>
+        <TouchableOpacity onPress={onPressHistory}>
+          <View style={styles.fabButton}>
+            <MaterialIcons name="menu-book" size={32} color="#fff" />
+          </View>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -85,6 +111,21 @@ const styles = StyleSheet.create({
     // height: Dimensions.get("screen").height / 1.5,
     height: "100%",
     width: "100%",
+  },
+  searchBarContainer: {
+    position: "absolute",
+    overflow: "hidden",
+    width: "100%",
+  },
+  fabContainer: {
+    position: "absolute",
+    bottom: 26,
+    right: 26,
+  },
+  fabButton: {
+    backgroundColor: "#22333b",
+    padding: 14,
+    borderRadius: 50,
   },
 });
 

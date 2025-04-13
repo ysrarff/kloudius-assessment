@@ -1,31 +1,32 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { TAppStoreType, TState } from "./types/SearchStoreType";
 
-interface ISearchedCoordinates {
-  latitude: number;
-  longitude: number;
-}
-
-type State = {
-  searchedCoordinates: ISearchedCoordinates | null;
+const initialState: TState = {
+  searchText: "",
+  searchResult: undefined,
+  selectedCoordinates: undefined,
+  selectedPlace: undefined,
 };
 
-type Actions = {
-  setSearchedCoordinates: (coords: ISearchedCoordinates) => void;
-};
-
-type AppStoreType = State & Actions;
-
-const initialState: State = {
-  searchedCoordinates: null,
-};
-
-export const useAppStore = create<AppStoreType>()(
+export const useAppStore = create<TAppStoreType>()(
   immer((set) => ({
     ...initialState,
-    setSearchedCoordinates: (val) =>
+    setSearchText: (input) =>
       set((state) => {
-        state.searchedCoordinates = val;
+        state.searchText = input;
+      }),
+    setSearchResult: (result) =>
+      set((state) => {
+        state.searchResult = result;
+      }),
+    setSelectedCoordinates: (coords) =>
+      set((state) => {
+        state.selectedCoordinates = coords;
+      }),
+    setSelectedPlace: (place) =>
+      set((state) => {
+        state.selectedPlace = place;
       }),
   }))
 );
