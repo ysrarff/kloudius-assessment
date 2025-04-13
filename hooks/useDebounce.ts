@@ -1,10 +1,8 @@
 import { useEffect, useCallback } from "react";
-
-type TEffect = () => void;
-type TDependencies = React.DependencyList;
+import { TDependencies, TEffectFn } from "./types/DebounceType";
 
 export default function useDebounce(
-  effect: TEffect,
+  effect: TEffectFn,
   dependencies: TDependencies,
   delay: number
 ) {
