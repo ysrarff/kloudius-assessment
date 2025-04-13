@@ -1,50 +1,51 @@
-# Welcome to your Expo app 👋
+# Kloudius Assessment with Expo (RN) 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+  
 
-## Get started
+  ## Prerequisites
+  1. Ensure you have Expo setup on your machine. For the basic prerequisites, you can follow [this](https://docs.expo.dev/tutorial/create-your-first-app/) tutorial
 
+  2. Make sure you have a Google Places API key setup with account. Follow [here](https://developers.google.com/maps/documentation/places/web-service/get-api-key) on this guide on how to obtain one. (Might concern billing, advisable to setup alerts for potential overcharge)
+
+  3. Have Expo Go installed in your emulator/physical device (**Note**: You cannot use iOS simulators on a Windows machine)
+
+## Get Started
 1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+
+npm install
+
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Create a new .env file in root directory and place your Google Places API key as follows:
 
-## Learn more
+```
+EXPO_PUBLIC_WEB_PLACES_API_KEY=<YOUR_API_KEY_HERE>
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Start the app
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+  
 
-## Join the community
+```bash
 
-Join our community of developers creating universal apps.
+npx expo start
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+  4. Scan the QR Code generated on the CLI or manually input the Expo URL on your Sim/Device. For example: *exp://192.168.100.13:8081*
+
+## How To Use App
+
+The app essentially has only 2 Screens:
+1. Home page where the Map and Search Bar is
+2. History page where it can be navigated from the FloatingActionButton with the book icon
+
+The search bar was configured to debounce the realtime search so we don't trigger API calls per letters typed.
+
+Once the location has been found it will be mapped on the map using a marker just like Google Maps. 
+
+The history page has all records of the search and will navigate to previously navigated locations. It is stored using react-native-async-storage on the device, therefore uninstalling the app will remove the stored data.
+
+***Note**: For iOS, it will default to Apple Maps since the react-native-maps package is having issues related to the current Expo SDK at the time of writing (13/4/2025) and therefore ignored.* 
+
+*Re-rolling back to SDK 51 will require an iOS sim to have the previous Expo Go ver. installed, which I cant since I am only developing using a Windows Machine + Evaluation will only count for android.*
