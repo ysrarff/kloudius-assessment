@@ -4,13 +4,12 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 
-import { useAppStore } from "@/store/useSearchStore";
+import { useSearchStore } from "@/store/useSearchStore";
 import { theme } from "@/constants/Colors";
 import SearchBar from "@/components/SearchBar";
 import FloatingActionButton from "@/components/FloatingActionButton";
@@ -21,7 +20,7 @@ function Index() {
     selectedCoordinates,
     selectedPlace,
     setSelectedCoordinates,
-  } = useAppStore();
+  } = useSearchStore();
 
   useEffect(() => {
     _getDefaultLocation();

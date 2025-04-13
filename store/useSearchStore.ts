@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { TAppStoreType, TState } from "./types/SearchStoreType";
+import { TSearchStoreType, TState } from "./types/SearchStoreType";
 
 const initialState: TState = {
   searchText: "",
@@ -9,7 +9,7 @@ const initialState: TState = {
   selectedPlace: undefined,
 };
 
-export const useAppStore = create<TAppStoreType>()(
+export const useSearchStore = create<TSearchStoreType>()(
   immer((set) => ({
     ...initialState,
     setSearchText: (input) =>

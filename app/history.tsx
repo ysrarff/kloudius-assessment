@@ -11,13 +11,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import { router } from "expo-router";
 
-import { useAppStore } from "@/store/useSearchStore";
+import { useSearchStore } from "@/store/useSearchStore";
 import { IPlace } from "@/store/types/SearchStoreType";
 import { theme } from "@/constants/Colors";
 
 function History() {
   const { setSearchResult, setSelectedCoordinates, setSelectedPlace } =
-    useAppStore();
+    useSearchStore();
 
   const [historyList, setHistoryList] = useState<IPlace[]>([]);
 

@@ -39,4 +39,4 @@ export type TActions = {
   setSelectedPlace: (place: ISelectedPlace | undefined) => void;
 };
 
-export type TAppStoreType = TState & TActions;
+export type TSearchStoreType = TState & TActions;

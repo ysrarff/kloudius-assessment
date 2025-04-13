@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import axios from "axios";
-import { useAppStore } from "@/store/useSearchStore";
+import { useSearchStore } from "@/store/useSearchStore";
 import useDebounce from "@/hooks/useDebounce";
 import { IPlace } from "@/store/types/SearchStoreType";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,7 +23,7 @@ function SearchBar() {
     setSearchResult,
     setSelectedCoordinates,
     setSelectedPlace,
-  } = useAppStore();
+  } = useSearchStore();
 
   const [searchText, setSearchText] = useState<string>("");
 
