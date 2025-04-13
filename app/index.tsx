@@ -1,4 +1,4 @@
-import SearchBar2 from "@/components/SearchBar2";
+import SearchBar from "@/components/SearchBar";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -80,7 +80,7 @@ function Index() {
             searchResult && searchResult?.places.length > 0 ? "100%" : "auto",
         }}
       >
-        <SearchBar2 />
+        <SearchBar />
       </SafeAreaView>
 
       <View style={styles.fabContainer}>

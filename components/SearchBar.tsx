@@ -1,40 +1,34 @@
 import { useEffect, useState } from "react";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import EvilIcons from "@expo/vector-icons/EvilIcons";
-import axios from "axios";
-
 import {
   View,
   TextInput,
-  Dimensions,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
 } from "react-native";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
+import axios from "axios";
+import { useAppStore } from "@/store/useSearchStore";
 import useDebounce from "@/hooks/useDebounce";
+import { IPlace } from "@/store/types/SearchStoreType";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type SearchResult = {
-  places: {
-    id: string;
-    formattedAddress: string;
-    location: {
-      latitude: number;
-      longitude: number;
-    };
-    displayName: {
-      text: string;
-      languageCode: string;
-    };
-  }[];
-};
-
-function SearchBar() {
+function SearchBar2() {
+  const {
+    searchResult,
+    setSearchResult,
+    setSelectedCoordinates,
+    setSelectedPlace,
+  } = useAppStore();
   const [searchText, setSearchText] = useState<string>("");
-  const [searchResult, setSearchResult] = useState<SearchResult | undefined>();
-  const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  useEffect(() => {
+    !!searchText && setSearchResult(undefined);
+  }, [searchText]);
 
   useDebounce(() => searchText && _handleSearch(), [searchText], 1600);
 
@@ -57,71 +51,107 @@ function SearchBar() {
       config
     );
 
-    console.log(req.data);
+    // console.log(req.data);
     req.status === 200 && setSearchResult(req.data);
   };
 
-  const onChangeText = async (searchText: string) => {
-    setSearchText(searchText);
-  };
+  const onSelectLocation = async (data: IPlace) => {
+    setSelectedCoordinates({
+      latitude: data.location.latitude,
+      longitude: data.location.longitude,
+    });
+    setSelectedPlace({
+      displayName: data.displayName,
+      formattedAddress: data.formattedAddress,
+    });
 
-  const onInputStyleChanged = (isFocused: boolean) => {
-    setIsFocused(isFocused);
-  };
+    try {
+      const storedLocation = await AsyncStorage.getItem("storedLocation");
+      if (storedLocation !== null) {
+        const locationArray = JSON.parse(storedLocation);
+        locationArray.push(data);
+        const reversedLocationArray = locationArray.reverse();
+        await AsyncStorage.setItem(
+          "storedLocation",
+          JSON.stringify(reversedLocationArray)
+        );
+      } else {
+        const locationArray = [];
+        locationArray.push(data);
+        await AsyncStorage.setItem(
+          "storedLocation",
+          JSON.stringify(locationArray)
+        );
+      }
 
-  const onClearTextInput = () => {
-    setSearchText("");
+      // const parsedLocation = JSON.stringify(data);
+      // await AsyncStorage.setItem(data.id, parsedLocation);
+    } catch (e) {
+      console.log("error saving location...", e);
+    }
     setSearchResult(undefined);
   };
 
+  const onChangeText = (searchText: string) => {
+    setSearchText(searchText);
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <>
-        <View style={styles.searchSection}>
-          {isFocused || searchText ? (
-            <TouchableOpacity onPress={onClearTextInput}>
-              <Ionicons
-                style={styles.searchIcon}
-                name="chevron-back"
-                size={32}
-                color="#000"
-              />
-            </TouchableOpacity>
-          ) : (
-            <EvilIcons
-              style={styles.searchIcon}
-              name="location"
-              size={32}
-              color="#000"
-            />
-          )}
-          <TextInput
-            placeholder="Search for an address"
-            placeholderTextColor={"#666"}
-            textAlign="left"
-            style={styles.input}
-            onChangeText={onChangeText}
-            onFocus={() => onInputStyleChanged(true)}
-            onBlur={() => onInputStyleChanged(false)}
-            value={searchText}
-          />
-        </View>
-        {searchResult && (
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scrollViewContainer}
-          >
-            {searchResult?.places.map((item) => {
-              return (
-                <View key={item?.id} style={styles.resultContainer}>
-                  <Text>{item?.displayName?.text}</Text>
+    <View
+      style={{
+        backgroundColor: searchResult ? "#F3F3F3" : "none",
+      }}
+    >
+      <View style={styles.searchSection}>
+        <EvilIcons
+          style={styles.searchIcon}
+          name="location"
+          size={32}
+          color="#000"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder={"Search for an address"}
+          placeholderTextColor={"#666"}
+          textAlign="left"
+          onChangeText={onChangeText}
+          value={searchText}
+        />
+      </View>
+      {searchResult && (
+        <ScrollView
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollViewContainer}
+        >
+          <Text style={styles.foundLocationText}>
+            Found {searchResult?.places.length} results:
+          </Text>
+          {searchResult?.places.map((item, idx) => {
+            return (
+              <TouchableOpacity
+                key={item?.id}
+                onPress={() => onSelectLocation(item)}
+              >
+                <View
+                  style={{
+                    ...styles.resultContainer,
+                    marginBottom:
+                      idx === searchResult?.places.length - 1 ? 20 : 0,
+                  }}
+                >
+                  <Text style={styles.placeName}>
+                    {item?.displayName?.text}
+                  </Text>
+                  <Text style={styles.placeAddress}>
+                    {item?.formattedAddress}
+                  </Text>
                 </View>
-              );
-            })}
-          </ScrollView>
-        )}
-      </>
-    </TouchableWithoutFeedback>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
+    </View>
   );
 }
 
@@ -134,6 +164,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     borderColor: "rgba(0,0,0,0.1)",
+    marginHorizontal: 16,
+    marginTop: 10,
   },
   searchIcon: {
     padding: 10,
@@ -148,24 +180,34 @@ const styles = StyleSheet.create({
     color: "#424242",
     marginRight: 10,
     fontSize: 16,
-    // fontFamily: "",
     height: Dimensions.get("screen").height / 17,
   },
   scrollViewContainer: {
-    flex: 1,
-    width: "100%",
+    height: "auto",
+    marginHorizontal: 16,
+  },
+  foundLocationText: {
+    fontWeight: "bold",
+    marginTop: 24,
+  },
+  placeName: {
+    fontSize: 14,
+  },
+  placeAddress: {
+    marginTop: 4,
+    fontSize: 10,
   },
   resultContainer: {
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     backgroundColor: "#fafafa",
     borderColor: "rgba(0,0,0,0.1)",
     borderRadius: 12,
     borderWidth: 1,
-    flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 8,
     padding: 16,
   },
 });
 
-export default SearchBar;
+export default SearchBar2;
